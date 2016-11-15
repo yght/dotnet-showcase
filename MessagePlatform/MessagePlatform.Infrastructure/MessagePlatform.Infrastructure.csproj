@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="0.0.6-preview" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.0.2" />
+    <PackageReference Include="StackExchange.Redis" Version="1.1.608" />
+    <PackageReference Include="WindowsAzure.Storage" Version="7.2.1" />
+    <PackageReference Include="Microsoft.Azure.NotificationHubs" Version="1.0.7" />
+    <PackageReference Include="SendGrid" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessagePlatform.Core\MessagePlatform.Core.csproj" />
+  </ItemGroup>
+
+</Project>

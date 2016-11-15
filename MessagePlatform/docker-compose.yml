@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  messageplatform-api:
+    build:
+      context: .
+      dockerfile: MessagePlatform.API/Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDB=mongodb://mongo:27017
+      - ConnectionStrings__Redis=redis:6379
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - messageplatform-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - messageplatform-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - messageplatform-network
+
+volumes:
+  mongo-data:
+
+networks:
+  messageplatform-network:
+    driver: bridge
