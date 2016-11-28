@@ -90,10 +90,19 @@ namespace MessagePlatform.API.Controllers
         public async Task<IActionResult> GetConversation(string userId, [FromQuery]int page = 1, [FromQuery]int pageSize = 50)
         {
             var currentUserId = User.Identity.Name;
+            
+            if (pageSize > 100)
+                pageSize = 100; // Limit page size to prevent performance issues
+                
             var messages = await _messageService.GetConversationAsync(currentUserId, userId, page, pageSize);
             var messageDtos = _mapper.Map<MessageDto[]>(messages);
             
-            return Ok(messageDtos);
+            return Ok(new { 
+                Messages = messageDtos,
+                Page = page,
+                PageSize = pageSize,
+                HasMore = messageDtos.Length == pageSize
+            });
         }
 
         [HttpPut("{messageId}/read")]
