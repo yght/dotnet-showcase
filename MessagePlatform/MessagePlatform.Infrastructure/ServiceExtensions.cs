@@ -10,7 +10,7 @@ namespace MessagePlatform.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             // Register services
-            services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddSingleton<ICacheService, CacheService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGroupService, GroupService>();
