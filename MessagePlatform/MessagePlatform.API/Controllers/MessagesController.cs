@@ -121,7 +121,27 @@ namespace MessagePlatform.API.Controllers
             var messages = await _messageService.GetUnreadMessagesAsync(userId);
             var messageDtos = _mapper.Map<MessageDto[]>(messages);
             
-            return Ok(messageDtos);
+            return Ok(new { 
+                Messages = messageDtos,
+                UnreadCount = messageDtos.Length
+            });
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchMessages([FromQuery]string query, [FromQuery]int page = 1, [FromQuery]int pageSize = 20)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Search query is required");
+
+            var userId = User.Identity.Name;
+            var messages = await _messageService.SearchMessagesAsync(userId, query);
+            var messageDtos = _mapper.Map<MessageDto[]>(messages);
+            
+            return Ok(new { 
+                Messages = messageDtos,
+                Query = query,
+                ResultCount = messageDtos.Length
+            });
         }
     }
 }
