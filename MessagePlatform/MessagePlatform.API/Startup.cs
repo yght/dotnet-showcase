@@ -12,6 +12,7 @@ using MessagePlatform.Core;
 using AutoMapper;
 using FluentValidation;
 using Swashbuckle.Swagger.Model;
+using MessagePlatform.API.Middleware;
 
 namespace MessagePlatform.API
 {
@@ -97,6 +98,10 @@ namespace MessagePlatform.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseMiddleware<ErrorHandlingMiddleware>();
             }
 
             app.UseCors("MessagePlatformPolicy");
