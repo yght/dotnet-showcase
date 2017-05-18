@@ -109,8 +109,23 @@ namespace MessagePlatform.API.Controllers
         public async Task<IActionResult> MarkAsRead(string messageId)
         {
             var userId = User.Identity.Name;
-            await _messageService.MarkAsReadAsync(messageId, userId);
+            var success = await _messageService.MarkAsReadAsync(messageId, userId);
             
+            if (!success)
+                return NotFound("Message not found or access denied");
+                
+            return Ok();
+        }
+
+        [HttpDelete("{messageId}")]
+        public async Task<IActionResult> DeleteMessage(string messageId)
+        {
+            var userId = User.Identity.Name;
+            var success = await _messageService.DeleteMessageAsync(messageId, userId);
+            
+            if (!success)
+                return NotFound("Message not found or access denied");
+                
             return Ok();
         }
 
