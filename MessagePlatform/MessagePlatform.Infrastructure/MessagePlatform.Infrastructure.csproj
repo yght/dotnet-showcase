@@ -1,22 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.4.2" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="0.0.6-preview" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Azure.NotificationHubs" Version="1.0.7" />
-    <PackageReference Include="SendGrid" Version="9.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.6" />
-    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="1.10.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="7.8.1" />
+    <PackageReference Include="StackExchange.Redis" Version="2.5.43" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.12.0" />
+    <PackageReference Include="Microsoft.Azure.NotificationHubs" Version="4.1.0" />
+    <PackageReference Include="SendGrid" Version="9.27.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.27.2" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="EventStore.ClientAPI.NetCore" Version="22.0.0" />
   </ItemGroup>
 
   <ItemGroup>
