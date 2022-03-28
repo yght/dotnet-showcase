@@ -12,9 +12,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MongoDB=mongodb://mongo:27017
       - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__SqlServer=Server=sqlserver;Database=MessagePlatform;User=sa;Password=YourStrong!Passw0rd;
+      - ConnectionStrings__EventStore=ConnectTo=tcp://admin:changeit@eventstore:1113
+      - CosmosDb__Endpoint=https://cosmos:8081
     depends_on:
       - mongo
       - redis
+      - sqlserver
+      - eventstore
     networks:
       - messageplatform-network
 
@@ -34,8 +39,51 @@ services:
     networks:
       - messageplatform-network
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - ACCEPT_EULA=Y
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - messageplatform-network
+
+  eventstore:
+    image: eventstore/eventstore:22.6.0-buster-slim
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    volumes:
+      - eventstore-data:/var/lib/eventstore
+    networks:
+      - messageplatform-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.35
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - messageplatform-network
+
 volumes:
   mongo-data:
+  sqlserver-data:
+  eventstore-data:
 
 networks:
   messageplatform-network:
