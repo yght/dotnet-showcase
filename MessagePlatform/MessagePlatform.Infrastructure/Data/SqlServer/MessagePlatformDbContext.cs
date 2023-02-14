@@ -13,6 +13,7 @@ namespace MessagePlatform.Infrastructure.Data.SqlServer
         public DbSet<Message> Messages { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +69,21 @@ namespace MessagePlatform.Infrastructure.Data.SqlServer
                     s.Property(x => x.MuteNotifications);
                     s.Property(x => x.MaxMembers);
                 });
+            });
+
+            modelBuilder.Entity<OutboxMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.EventType).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Payload).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.SequenceNumber).IsRequired();
+                
+                // indexes for performance - real world consideration
+                entity.HasIndex(e => new { e.IsProcessed, e.SequenceNumber })
+                      .HasDatabaseName("IX_OutboxMessages_Processing");
+                entity.HasIndex(e => e.CreatedAt)
+                      .HasDatabaseName("IX_OutboxMessages_CreatedAt");
             });
 
             base.OnModelCreating(modelBuilder);

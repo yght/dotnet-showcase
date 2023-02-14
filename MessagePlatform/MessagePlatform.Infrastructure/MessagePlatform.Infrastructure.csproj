@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.4.2" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="0.0.6-preview" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.0" />
