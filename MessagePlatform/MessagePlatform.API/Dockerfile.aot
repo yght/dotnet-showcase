@@ -1,0 +1,26 @@
+# AOT Dockerfile - much smaller than regular .NET apps
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+
+# copy project files
+COPY MessagePlatform.API.csproj .
+RUN dotnet restore
+
+# copy source code
+COPY . .
+
+# publish with AOT
+RUN dotnet publish -c Release -r linux-x64 --self-contained -o /app/publish
+
+# runtime image - can use distroless or even scratch
+FROM mcr.microsoft.com/dotnet/runtime-deps:7.0 AS runtime
+WORKDIR /app
+
+# copy the AOT compiled binary
+COPY --from=build /app/publish .
+
+# the AOT binary doesn't need the .NET runtime
+ENTRYPOINT ["./MessagePlatform.API"]
+
+# this image will be much smaller than regular .NET images
+# and start much faster too
