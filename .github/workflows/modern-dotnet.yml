@@ -1,0 +1,21 @@
+name: Modern .NET tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore modern/ModernMessaging.sln
+      - run: dotnet build modern/ModernMessaging.sln --no-restore --configuration Release --warnaserror
+      - run: dotnet test modern/ModernMessaging.sln --no-build --configuration Release
