@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Messaging;
+using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -19,6 +20,19 @@ app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "alive" }));
+app.MapGet("/health/ready", (MessageStore store, HttpContext context) =>
+{
+    context.Response.Headers.CacheControl = "no-store";
+    try
+    {
+        store.CheckReadiness();
+        return Results.Ok(new { status = "ready" });
+    }
+    catch (SqliteException)
+    {
+        return Results.Problem(statusCode: 503, title: "Storage unavailable");
+    }
+});
 var messages = app.MapGroup("/api/messages").RequireAuthorization("messaging");
 messages.MapPost("/", (SendMessage input, ClaimsPrincipal user, MessageStore store) =>
 {

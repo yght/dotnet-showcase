@@ -88,3 +88,12 @@ No measured production scale or performance gain is claimed for this sample.
 [Contribution and verification guide](CONTRIBUTING.md) · [Review template](.github/pull_request_template.md)
 
 The modern .NET 10 solution is the verification target. Historical MessagePlatform source is not included in that gate.
+
+## Operational readiness
+
+- `GET /health` reports process liveness.
+- `GET /health/ready` opens SQLite read-only and checks the message schema: 200 when accessible, 503 when storage is unavailable. Responses disable caching and omit database error details.
+- Configure traffic routing to use readiness, and restart monitoring to use liveness. A database outage should remove traffic without causing a restart loop.
+- This probe does not create missing databases or write test messages. It proves read access and schema presence, not disk capacity, write permissions or external-service health. The SQLite lock timeout is one second; this is not an end-to-end request deadline.
+
+The modern suite now includes storage-failure and missing-database regression tests. Review `CheckReadiness` and the health endpoint integration test to discuss the difference between a live process and a service ready for traffic.

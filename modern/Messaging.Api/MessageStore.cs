@@ -40,6 +40,21 @@ public sealed class MessageStore(string connectionString, TimeProvider clock)
         command.ExecuteNonQuery();
     }
 
+    // Read-only probe: validate the schema without creating a missing database.
+    public void CheckReadiness()
+    {
+        var settings = new SqliteConnectionStringBuilder(connectionString)
+        {
+            Mode = SqliteOpenMode.ReadOnly,
+            DefaultTimeout = 1
+        };
+        using var db = new SqliteConnection(settings.ToString());
+        db.Open();
+        using var command = db.CreateCommand();
+        command.CommandText = "SELECT sequence,id,tenant,sender,recipient,client_id,body,sent_at FROM messages LIMIT 0";
+        command.ExecuteNonQuery();
+    }
+
     public SendResult Send(string tenant, string sender, SendMessage input)
     {
         using var db = Open();

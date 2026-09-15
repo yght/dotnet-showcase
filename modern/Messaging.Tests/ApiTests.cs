@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Messaging;
+using Microsoft.Data.Sqlite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -33,6 +34,15 @@ public sealed class TestApi : WebApplicationFactory<Program>
             };
         }));
     }
+    public void DropMessageTable()
+    {
+        using var db = new SqliteConnection($"Data Source={path};Pooling=False");
+        db.Open();
+        using var command = db.CreateCommand();
+        command.CommandText = "DROP TABLE messages";
+        command.ExecuteNonQuery();
+    }
+
     public HttpClient User(string user = "alice", string? tenant = "tenant-a", bool expired = false)
     {
         var client = CreateClient();
@@ -55,6 +65,31 @@ public sealed class TestApi : WebApplicationFactory<Program>
 public sealed class ApiTests
 {
     private static SendMessage Input(string id = "client-1", string body = "Hello") => new("bob", body, id);
+
+    [Fact]
+    public async Task Readiness_detects_storage_failure_while_liveness_stays_available()
+    {
+        using var api = new TestApi();
+        using var client = api.CreateClient();
+        var healthy = await client.GetAsync("/health/ready");
+        Assert.Equal(HttpStatusCode.OK, healthy.StatusCode);
+        Assert.True(healthy.Headers.CacheControl!.NoStore);
+        api.DropMessageTable();
+        var failed = await client.GetAsync("/health/ready");
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
+        var body = await failed.Content.ReadAsStringAsync();
+        Assert.DoesNotContain("no such table", body);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health")).StatusCode);
+    }
+
+    [Fact]
+    public void Readiness_does_not_create_a_missing_database()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.db");
+        var store = new MessageStore($"Data Source={path};Pooling=False", TimeProvider.System);
+        Assert.Throws<SqliteException>(() => store.CheckReadiness());
+        Assert.False(File.Exists(path));
+    }
 
     [Fact]
     public async Task Rejects_missing_and_expired_tokens()
