@@ -97,3 +97,16 @@ The modern .NET 10 solution is the verification target. Historical MessagePlatfo
 - This probe does not create missing databases or write test messages. It proves read access and schema presence, not disk capacity, write permissions or external-service health. The SQLite lock timeout is one second; this is not an end-to-end request deadline.
 
 The modern suite now includes storage-failure and missing-database regression tests. Review `CheckReadiness` and the health endpoint integration test to discuss the difference between a live process and a service ready for traffic.
+
+## Private response caching policy
+
+All responses beneath `/api/messages` send `Cache-Control: no-store`, including
+authentication failures, validation errors and idempotency conflicts.
+Middleware registers the header before authentication and applies it when the
+response starts, so early failures follow the same policy as successful reads.
+
+Integration tests cover reads, writes, 400, 401 and 409 responses. This directs
+compliant HTTP caches not to retain responses; it does not clear previously
+stored data, application logs or client-side state. TLS, authentication and
+tenant authorization are still required. Run
+`dotnet test modern/ModernMessaging.sln --configuration Release`.

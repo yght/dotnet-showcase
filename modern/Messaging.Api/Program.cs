@@ -17,6 +17,19 @@ builder.Services.AddSingleton(sp => new MessageStore(
 var app = builder.Build();
 app.Services.GetRequiredService<MessageStore>().Initialize();
 app.UseExceptionHandler();
+// Apply before authentication so private API errors are not cached either.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/messages"))
+    {
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers.CacheControl = "no-store";
+            return Task.CompletedTask;
+        });
+    }
+    await next(context);
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "alive" }));

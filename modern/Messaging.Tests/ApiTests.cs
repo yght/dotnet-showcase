@@ -64,6 +64,32 @@ public sealed class TestApi : WebApplicationFactory<Program>
 
 public sealed class ApiTests
 {
+    [Theory]
+    [InlineData(true, "/api/messages/conversations/bob", 200)]
+    [InlineData(true, "/api/messages/conversations/bob?limit=0", 400)]
+    [InlineData(false, "/api/messages/conversations/bob", 401)]
+    public async Task Private_responses_disable_storage(bool authenticated, string path, int status)
+    {
+        using var api = new TestApi();
+        using var client = authenticated ? api.User() : api.CreateClient();
+        var response = await client.GetAsync(path);
+        Assert.Equal(status, (int)response.StatusCode);
+        Assert.True(response.Headers.CacheControl?.NoStore);
+    }
+
+    [Fact]
+    public async Task Message_writes_and_conflicts_also_disable_storage()
+    {
+        using var api = new TestApi();
+        using var client = api.User();
+        var created = await client.PostAsJsonAsync("/api/messages/", Input());
+        var conflict = await client.PostAsJsonAsync("/api/messages/", Input(body: "changed"));
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, conflict.StatusCode);
+        Assert.True(created.Headers.CacheControl?.NoStore);
+        Assert.True(conflict.Headers.CacheControl?.NoStore);
+    }
+
     private static SendMessage Input(string id = "client-1", string body = "Hello") => new("bob", body, id);
 
     [Fact]
